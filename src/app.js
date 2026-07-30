@@ -7,7 +7,7 @@ const game = new Game(parseLevels(await fetch("lib/levels").then(response => res
 const colors = {
   Empty: "#10162a", Block: "#344267", Gate: "#ffd65a", Disc: "#5dd8f5",
   Killer: "#ff5277", Freeze: "#78f1df", Player: "#68efcc",
-  Spiky: "#a988ff", Fluffy: "#ffd65a",
+  Spiky: "#a988ff", Fluffy: "#ffd65a", Heart: "#ff6687", Dead: "#ff6687",
 };
 let unit = 48;
 
@@ -114,17 +114,38 @@ function creature(x, y, kind) {
     ctx.beginPath();
     ctx.arc(0, 0, unit * .25, 0, Math.PI * 2);
     ctx.fill();
+  } else if (kind === "Heart") {
+    ctx.beginPath();
+    ctx.moveTo(0, unit * .34);
+    ctx.bezierCurveTo(-unit * .5, unit * .03, -unit * .34, -unit * .35, 0, -unit * .16);
+    ctx.bezierCurveTo(unit * .34, -unit * .35, unit * .5, unit * .03, 0, unit * .34);
+    ctx.fill();
+    ctx.restore();
+    return;
   } else {
     roundedRect(-unit * .32, -unit * .34, unit * .64, unit * .68, unit * .22);
     ctx.fill();
   }
 
   ctx.shadowBlur = 0;
-  ctx.fillStyle = "#11162a";
-  ctx.beginPath();
-  ctx.arc(-unit * .11, -unit * .05, unit * .055, 0, Math.PI * 2);
-  ctx.arc(unit * .11, -unit * .05, unit * .055, 0, Math.PI * 2);
-  ctx.fill();
+  if (kind === "Dead") {
+    ctx.strokeStyle = "#11162a";
+    ctx.lineWidth = unit * .045;
+    for (const x of [-unit * .11, unit * .11]) {
+      ctx.beginPath();
+      ctx.moveTo(x - unit * .05, -unit * .1);
+      ctx.lineTo(x + unit * .05, 0);
+      ctx.moveTo(x + unit * .05, -unit * .1);
+      ctx.lineTo(x - unit * .05, 0);
+      ctx.stroke();
+    }
+  } else {
+    ctx.fillStyle = "#11162a";
+    ctx.beginPath();
+    ctx.arc(-unit * .11, -unit * .05, unit * .055, 0, Math.PI * 2);
+    ctx.arc(unit * .11, -unit * .05, unit * .055, 0, Math.PI * 2);
+    ctx.fill();
+  }
   if (kind === "Player") {
     ctx.strokeStyle = "#11162a";
     ctx.lineWidth = unit * .04;
@@ -160,9 +181,13 @@ function draw() {
   for (let y = 0; y < 15; y++) {
     for (let x = 0; x < 20; x++) tile(x, y, game.cells[y][x]);
   }
-  if (game.spiky.x < 20) creature(game.spiky.x, game.spiky.y, "Spiky");
-  if (game.fluffy.x < 20) creature(game.fluffy.x, game.fluffy.y, "Fluffy");
-  creature(game.player.x, game.player.y, "Player");
+  if (game.transition === "heart") {
+    creature(game.spiky.x, game.spiky.y, "Heart");
+  } else {
+    if (game.spiky.x < 20) creature(game.spiky.x, game.spiky.y, "Spiky");
+    if (game.fluffy.x < 20) creature(game.fluffy.x, game.fluffy.y, "Fluffy");
+  }
+  creature(game.player.x, game.player.y, game.transition === "dead" ? "Dead" : "Player");
 }
 
 function sync() {
@@ -171,12 +196,28 @@ function sync() {
   $("#level-title").textContent = game.title ?? "Get the monsters together";
   $("#pause").textContent = game.paused ? "▶" : "Ⅱ";
   $("#pause").ariaLabel = game.paused ? "Resume game" : "Pause game";
-  $("#message").textContent = game.gameOver ? "Game over" : game.paused ? "Game paused" :
+  $("#message").textContent = game.transition === "heart" ? "Together!" :
+    game.transition === "dead" ? "AAAAaaaarrrrgggghhh..." :
+    game.gameOver ? "Game over" : game.paused ? "Game paused" :
     game.freeze ? `Monsters frozen · ${Math.ceil(game.freeze / 4) / 10}s` : "";
   draw();
 }
 
+let transitionTimer;
+
+function scheduleTransition() {
+  if (!game.transition || transitionTimer) return;
+  transitionTimer = setTimeout(() => {
+    transitionTimer = null;
+    game.finishTransition();
+    if (game.gameOver) $("#welcome").classList.remove("hidden");
+    sync();
+  }, game.transition === "heart" ? 900 : 1000);
+}
+
 function start() {
+  clearTimeout(transitionTimer);
+  transitionTimer = null;
   game.start();
   $("#welcome").classList.add("hidden");
   canvas.focus();
@@ -186,15 +227,22 @@ function start() {
 function move(dx, dy) {
   game.move(dx, dy);
   sync();
+  scheduleTransition();
 }
 
 $("#play").addEventListener("click", start);
 $("#pause").addEventListener("click", () => {
-  if (!game.gameOver) game.paused = !game.paused;
+  if (!game.gameOver && !game.transition) game.paused = !game.paused;
   sync();
 });
-$("#lose").addEventListener("click", () => { game.loseLife(); sync(); });
+$("#lose").addEventListener("click", () => {
+  game.loseLife();
+  sync();
+  scheduleTransition();
+});
 $("#end").addEventListener("click", () => {
+  clearTimeout(transitionTimer);
+  transitionTimer = null;
   game.gameOver = true;
   $("#welcome").classList.remove("hidden");
   sync();
@@ -214,7 +262,7 @@ addEventListener("keydown", event => {
   } else if (event.key === "F2") {
     event.preventDefault(); $("#pause").click();
   } else if (event.key === "F3") {
-    event.preventDefault(); game.loseLife(); sync();
+    event.preventDefault(); $("#lose").click();
   } else if (event.key === "F8") {
     event.preventDefault(); $("#end").click();
   }
@@ -233,11 +281,18 @@ canvas.addEventListener("pointerup", event => {
 
 setInterval(() => {
   game.tick();
-  if (!game.gameOver && !game.paused) sync();
+  sync();
+  scheduleTransition();
 }, 250);
 addEventListener("resize", draw);
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden && !game.gameOver) game.paused = true;
+  if (document.hidden) {
+    clearTimeout(transitionTimer);
+    transitionTimer = null;
+    if (!game.gameOver) game.paused = true;
+  } else {
+    scheduleTransition();
+  }
   sync();
 });
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("service-worker.js");

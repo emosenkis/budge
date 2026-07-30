@@ -51,6 +51,7 @@ export class Game {
     this.levelIndex = 0;
     this.gameOver = false;
     this.paused = false;
+    this.transition = null;
     this.#load();
     this.lastEvent = "started";
     return this;
@@ -100,19 +101,35 @@ export class Game {
   }
 
   loseLife() {
-    if (!this.gameOver) this.#loseLife();
+    if (!this.gameOver && !this.transition) this.#loseLife();
   }
 
   #loseLife() {
     this.lives--;
     this.freeze = 0;
-    if (this.lives) {
+    this.paused = true;
+    this.transition = "dead";
+    this.lastEvent = "life-lost";
+  }
+
+  finishTransition() {
+    if (this.transition === "dead") {
+      this.transition = null;
+      if (!this.lives) {
+        this.gameOver = true;
+        this.lastEvent = "game-over";
+        return;
+      }
       this.#load();
       this.paused = false;
-      this.lastEvent = "life-lost";
-    } else {
-      this.gameOver = true;
-      this.lastEvent = "game-over";
+      this.lastEvent = "restarted";
+    } else if (this.transition === "heart") {
+      this.levelNumber++;
+      this.levelIndex = this.levelNumber > this.levels.length ? 0 : this.levelIndex + 1;
+      this.transition = null;
+      this.#load();
+      this.paused = false;
+      this.lastEvent = "level-complete";
     }
   }
 
@@ -144,10 +161,9 @@ export class Game {
     if (this.cells[this.player.y][this.player.x] === "Monster") {
       this.#loseLife();
     } else if (this.fluffy.x === this.spiky.x && this.fluffy.y === this.spiky.y) {
-      this.levelNumber++;
-      this.levelIndex = this.levelNumber > this.levels.length ? 0 : this.levelIndex + 1;
-      this.#load();
-      this.lastEvent = "level-complete";
+      this.paused = true;
+      this.transition = "heart";
+      this.lastEvent = "monsters-met";
     } else {
       this.lastEvent = "tick";
     }

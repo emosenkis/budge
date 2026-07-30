@@ -1,4 +1,4 @@
-const CACHE = "budge-v1";
+const CACHE = "budge-v2";
 const FILES = [
   "./", "index.html", "style.css", "src/app.js", "src/game.js",
   "lib/levels", "manifest.webmanifest", "icon-192.png", "icon-512.png",

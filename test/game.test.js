@@ -86,7 +86,7 @@ test("freeze ticks do nothing, including on the final frozen tick", () => {
   assert.deepEqual(game.spiky, { x: 4, y: 4 });
 });
 
-test("touching a monster costs a life and reloads the current level", () => {
+test("touching a monster pauses on dead Budge before reloading the level", () => {
   const game = new Game(parseLevels(level("Danger", {
     "1,1": "P", "2,1": "*", "10,10": "@",
   }))).start();
@@ -95,9 +95,14 @@ test("touching a monster costs a life and reloads the current level", () => {
   assert.equal(game.lives, 2);
   assert.deepEqual(game.player, { x: 1, y: 1 });
   assert.equal(game.lastEvent, "life-lost");
+  assert.equal(game.transition, "dead");
+  assert.equal(game.paused, true);
+  game.finishTransition();
+  assert.equal(game.transition, null);
+  assert.equal(game.paused, false);
 });
 
-test("monster collision advances levels and preserves the original wrap bug", () => {
+test("monster collision pauses on hearts, then advances with the original wrap bug", () => {
   const levels = parseLevels([
     level("One", { "10,5": "P", "5,5": "*", "6,5": "@", "7,5": "#" }),
     level("Two", { "10,5": "P", "5,5": "*", "6,5": "@", "7,5": "#" }),
@@ -105,12 +110,17 @@ test("monster collision advances levels and preserves the original wrap bug", ()
   const game = new Game(levels).start();
 
   game.tick();
+  assert.equal(game.transition, "heart");
+  assert.equal(game.title, "One");
+  game.finishTransition();
   assert.equal(game.title, "Two");
   assert.equal(game.levelNumber, 2);
   game.tick();
+  game.finishTransition();
   assert.equal(game.title, "One");
   assert.equal(game.levelNumber, 3);
   game.tick();
+  game.finishTransition();
   assert.equal(game.title, "One");
   assert.equal(game.levelNumber, 4);
 });
@@ -134,5 +144,19 @@ test("the explicit lose-a-life control still works while paused", () => {
 
   game.loseLife();
   assert.equal(game.lives, 2);
+  assert.equal(game.transition, "dead");
+  game.finishTransition();
   assert.equal(game.paused, false);
+});
+
+test("the final death remains visible until its transition ends", () => {
+  const game = new Game(parseLevels(level("Last life", {
+    "1,1": "P", "5,5": "*", "10,10": "@",
+  })), 1).start();
+
+  game.loseLife();
+  assert.equal(game.transition, "dead");
+  assert.equal(game.gameOver, false);
+  game.finishTransition();
+  assert.equal(game.gameOver, true);
 });
