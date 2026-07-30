@@ -161,6 +161,49 @@ kbd { margin-left: 12px; color: #387c6d; font: 500 9px ui-monospace, monospace; 
   font-weight: 700;
 }
 
+dialog {
+  width: min(1000px, calc(100% - 20px));
+  max-height: calc(100% - 20px);
+  border: 1px solid #3b4567;
+  border-radius: 20px;
+  padding: 18px;
+  background: #11162a;
+  color: #f5f7ff;
+  box-shadow: 0 32px 90px #000c;
+}
+dialog::backdrop { background: #050814dc; backdrop-filter: blur(8px); }
+.editor-head { display: flex; align-items: center; justify-content: space-between; }
+.editor-head h2 { margin: 4px 0 12px; font-size: clamp(22px, 4vw, 34px); letter-spacing: -.04em; }
+.title-input { display: flex; align-items: center; gap: 12px; color: #919cba; font-size: 11px; }
+.title-input input {
+  flex: 1;
+  border: 1px solid #394361;
+  border-radius: 9px;
+  padding: 9px 11px;
+  background: #0c1124;
+  color: #eef2ff;
+  font: inherit;
+}
+.palette { display: flex; gap: 5px; overflow-x: auto; padding: 12px 0; }
+.palette button {
+  min-width: 58px;
+  border: 1px solid #303a59;
+  border-radius: 10px;
+  padding: 6px;
+  background: #192039;
+  font-size: 20px;
+}
+.palette button.selected { border-color: var(--mint); background: #243a43; }
+.palette small { display: block; margin-top: 3px; color: #8995b4; font-size: 7px; }
+#editor-board {
+  border: 1px solid #34405f;
+  border-radius: 10px;
+  background: #10162a;
+  cursor: crosshair;
+}
+#editor-error { min-height: 18px; margin: 7px 0; color: #ff7797; font-size: 11px; }
+.editor-actions { display: flex; justify-content: flex-end; gap: 6px; }
+
 .controls {
   display: flex;
   align-items: center;

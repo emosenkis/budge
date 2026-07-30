@@ -23,3 +23,16 @@ test("pause screen can resume or trade one life to restart", () => {
   assert.match(html, /restart current level/i);
   assert.match(html, /costs one life/i);
 });
+
+test("intro opens a level editor with the complete palette and export actions", () => {
+  const html = readFileSync("index.html", "utf8");
+
+  assert.match(html, /id="open-editor"/);
+  assert.match(html, /id="editor"/);
+  assert.match(html, /id="editor-board"/);
+  assert.match(html, /id="test-level"/);
+  assert.match(html, /id="download-level"/);
+  for (const piece of ["#", "-", "+", "o", "x", "f", "P", "*", "@"]) {
+    assert.match(html, new RegExp(`data-piece="${piece.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`));
+  }
+});

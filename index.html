@@ -50,6 +50,7 @@
               <span data-symbol="invisible wall"><i class="mini invisible">◇</i><small><strong>Invisible wall</strong>Hidden obstacle</small></span>
             </div>
             <button id="play" class="primary">Play Budge <kbd>F1</kbd></button>
+            <button id="open-editor" class="secondary">Level editor</button>
             <p class="hint">Arrow keys, swipe, or use the controls below</p>
           </div>
         </div>
@@ -78,6 +79,35 @@
       </nav>
     </section>
   </main>
+  <dialog id="editor">
+    <div class="editor-head">
+      <div>
+        <p class="eyebrow">LEVEL EDITOR</p>
+        <h2>Build a Budge level</h2>
+      </div>
+      <button id="close-editor" class="icon-button" aria-label="Close editor">×</button>
+    </div>
+    <label class="title-input">Level title <input id="editor-title" value="My Level" maxlength="60"></label>
+    <div class="palette" aria-label="Level pieces">
+      <button data-piece=" " title="Erase">⌫<small>Erase</small></button>
+      <button data-piece="#" title="Wall">▰<small>Wall</small></button>
+      <button data-piece="-" title="Invisible wall">◇<small>Invisible</small></button>
+      <button data-piece="+" title="Gate">╫<small>Gate</small></button>
+      <button data-piece="o" title="Disc">⦿<small>Disc</small></button>
+      <button data-piece="x" title="Killer">✣<small>Killer</small></button>
+      <button data-piece="f" title="Freeze pill">✚<small>Freeze</small></button>
+      <button data-piece="P" title="Budge">●<small>Budge</small></button>
+      <button data-piece="*" title="Spiky">✦<small>Spiky</small></button>
+      <button data-piece="@" title="Fluffy">✹<small>Fluffy</small></button>
+    </div>
+    <canvas id="editor-board" width="960" height="720"
+      aria-label="Editable 20 by 15 level grid"></canvas>
+    <p id="editor-error" role="alert"></p>
+    <div class="editor-actions">
+      <button id="test-level" class="primary">Play-test level</button>
+      <button id="download-level" class="secondary">Download level file</button>
+    </div>
+  </dialog>
   <footer>Original game and levels © 1994 Nat Pryce · <a href="COPYRIGHT">GPLv3</a></footer>
   <script type="module" src="src/app.js"></script>
 </body>

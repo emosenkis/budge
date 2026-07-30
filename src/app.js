@@ -1,4 +1,5 @@
 import { Game, parseLevels } from "./game.js";
+import { blankLevel, serializeLevel } from "./editor.js";
 
 const $ = selector => document.querySelector(selector);
 const canvas = $("#board");
@@ -254,6 +255,106 @@ $("#end").addEventListener("click", () => {
 document.querySelectorAll("[data-move]").forEach(button =>
   button.addEventListener("click", () => move(...button.dataset.move.split(",").map(Number))));
 
+const editor = $("#editor");
+const editorCanvas = $("#editor-board");
+const editorCtx = editorCanvas.getContext("2d");
+let editorRows;
+let selectedPiece = "#";
+
+function resetEditor() {
+  editorRows = blankLevel();
+  for (let x = 0; x < 20; x++) editorRows[0][x] = editorRows[14][x] = "#";
+  for (let y = 0; y < 15; y++) editorRows[y][0] = editorRows[y][19] = "#";
+  editorRows[7][2] = "P";
+  editorRows[4][17] = "*";
+  editorRows[10][17] = "@";
+}
+
+function drawEditor() {
+  const width = editorCanvas.clientWidth;
+  if (!width) return;
+  const dpr = Math.min(devicePixelRatio, 2);
+  const size = width / 20;
+  const height = size * 15;
+  editorCanvas.width = width * dpr;
+  editorCanvas.height = height * dpr;
+  editorCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  editorCtx.textAlign = "center";
+  editorCtx.textBaseline = "middle";
+  editorCtx.font = `700 ${size * .55}px system-ui`;
+  const glyph = { "#": "▰", "-": "◇", "+": "╫", o: "⦿", x: "✣", f: "✚", P: "●", "*": "✦", "@": "✹" };
+  const color = { "#": "#7d8ab0", "-": "#4d5876", "+": "#ffd65a", o: "#5dd8f5", x: "#ff5277", f: "#78f1df", P: "#68efcc", "*": "#a988ff", "@": "#ffd65a" };
+  for (let y = 0; y < 15; y++) {
+    for (let x = 0; x < 20; x++) {
+      editorCtx.fillStyle = "#10162a";
+      editorCtx.fillRect(x * size, y * size, size, size);
+      editorCtx.strokeStyle = "#202944";
+      editorCtx.strokeRect(x * size, y * size, size, size);
+      const piece = editorRows[y][x];
+      if (piece !== " ") {
+        editorCtx.fillStyle = color[piece];
+        editorCtx.fillText(glyph[piece], (x + .5) * size, (y + .5) * size);
+      }
+    }
+  }
+}
+
+function paintEditor(event) {
+  const rect = editorCanvas.getBoundingClientRect();
+  const x = Math.floor((event.clientX - rect.left) * 20 / rect.width);
+  const y = Math.floor((event.clientY - rect.top) * 15 / rect.height);
+  if (x >= 0 && x < 20 && y >= 0 && y < 15) {
+    editorRows[y][x] = selectedPiece;
+    drawEditor();
+  }
+}
+
+function editorText() {
+  try {
+    const text = serializeLevel($("#editor-title").value, editorRows);
+    $("#editor-error").textContent = "";
+    return text;
+  } catch (error) {
+    $("#editor-error").textContent = error.message;
+  }
+}
+
+$("#open-editor").addEventListener("click", () => {
+  resetEditor();
+  editor.showModal();
+  requestAnimationFrame(drawEditor);
+});
+$("#close-editor").addEventListener("click", () => editor.close());
+document.querySelectorAll("[data-piece]").forEach(button =>
+  button.addEventListener("click", () => {
+    selectedPiece = button.dataset.piece;
+    document.querySelectorAll("[data-piece]").forEach(item =>
+      item.classList.toggle("selected", item === button));
+  }));
+editorCanvas.addEventListener("pointerdown", event => {
+  editorCanvas.setPointerCapture(event.pointerId);
+  paintEditor(event);
+});
+editorCanvas.addEventListener("pointermove", event => {
+  if (event.buttons) paintEditor(event);
+});
+$("#test-level").addEventListener("click", () => {
+  const text = editorText();
+  if (!text) return;
+  game.levels = parseLevels(text);
+  editor.close();
+  start();
+});
+$("#download-level").addEventListener("click", () => {
+  const text = editorText();
+  if (!text) return;
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+  link.download = "budge-level.txt";
+  link.click();
+  URL.revokeObjectURL(link.href);
+});
+
 addEventListener("keydown", event => {
   const directions = {
     ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0],
@@ -288,7 +389,10 @@ setInterval(() => {
   sync();
   scheduleTransition();
 }, 250);
-addEventListener("resize", draw);
+addEventListener("resize", () => {
+  draw();
+  if (editor.open) drawEditor();
+});
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     clearTimeout(transitionTimer);
