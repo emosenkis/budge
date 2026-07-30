@@ -1,0 +1,14 @@
+{
+  "name": "Budge — by Nat Pryce",
+  "short_name": "Budge",
+  "description": "The classic arcade puzzle by Nat Pryce, rewritten for modern screens.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#090d1b",
+  "theme_color": "#11162a",
+  "orientation": "any",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

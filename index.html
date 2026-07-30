@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#11162a">
+  <meta name="description" content="Budge — the classic arcade puzzle by Nat Pryce, reimagined for modern screens.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <title>Budge — by Nat Pryce</title>
+</head>
+<body>
+  <main>
+    <header>
+      <a class="brand" href="./" aria-label="Budge home">
+        <span class="brand-mark">B</span>
+        <span><strong>Budge</strong><small>by Nat Pryce</small></span>
+      </a>
+      <div class="stats" aria-live="polite">
+        <span><small>LEVEL</small><strong id="level">—</strong></span>
+        <span><small>LIVES</small><strong id="lives">♥ ♥ ♥</strong></span>
+      </div>
+      <button id="pause" class="icon-button" aria-label="Pause game" title="Pause (F2)">Ⅱ</button>
+    </header>
+
+    <section class="game-shell" aria-label="Budge game">
+      <div class="title-row">
+        <p id="level-title">Get the monsters together</p>
+        <p id="message" role="status"></p>
+      </div>
+      <div class="board-wrap">
+        <canvas id="board" width="960" height="720" tabindex="0"
+          aria-label="Game board. Use arrow keys or the on-screen direction buttons."></canvas>
+        <div id="welcome" class="overlay">
+          <div class="welcome-card">
+            <p class="eyebrow">THE 1994 ARCADE PUZZLE, REWIRED</p>
+            <h1>Bring two unlikely<br>monsters together.</h1>
+            <p>Guide Budge through gates, push discs, and bend two very different minds onto the same square.</p>
+            <div class="cast">
+              <span><i class="mini spiky">✦</i><small>SPIKY<br>chases you</small></span>
+              <span><i class="mini player">●</i><small>BUDGE<br>that's you</small></span>
+              <span><i class="mini fluffy">✹</i><small>FLUFFY<br>turns at walls</small></span>
+            </div>
+            <button id="play" class="primary">Play Budge <kbd>F1</kbd></button>
+            <p class="hint">Arrow keys, swipe, or use the controls below</p>
+          </div>
+        </div>
+      </div>
+
+      <nav class="controls" aria-label="Touch controls">
+        <div class="dpad">
+          <button data-move="0,-1" aria-label="Move up">↑</button>
+          <button data-move="-1,0" aria-label="Move left">←</button>
+          <button data-move="0,1" aria-label="Move down">↓</button>
+          <button data-move="1,0" aria-label="Move right">→</button>
+        </div>
+        <div class="actions">
+          <button id="lose" title="Lose a life (F3)">Lose a life</button>
+          <button id="end" title="End game (F8)">End game</button>
+        </div>
+      </nav>
+    </section>
+  </main>
+  <footer>Original game and levels © 1994 Nat Pryce · <a href="COPYRIGHT">GPLv3</a></footer>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

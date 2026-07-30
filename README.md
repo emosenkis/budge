@@ -1,34 +1,24 @@
-# Budge - an arcade/puzzle game
+# Budge
 
-This is an HTML/Javascript port of the original [Budge by Nat
-Pryce](https://github.com/npryce/budge). Play at
-https://emosenkis.github.io/budge/budge.html.
+A modern, installable rewrite of Nat Pryce's 1994 Tcl/Tk arcade puzzle.
+It uses one dependency-free web codebase for desktop browsers, the web,
+Android, and iOS, with keyboard, touch buttons, and swipe controls.
 
-It can be thought of as a cross between Sokoban, Pac-Man and Blind Date (the
-TV show).
+Play at https://emosenkis.github.io/budge/.
 
-The object of the game is complete every level by getting the two monsters on
-each level to bump into each other. One of the monsters wanders about 
-aimlessly, turning every time it bumps into anything. The other chases you 
-mercilessly, but stupidly. To help manoever the monsters together the levels 
-contain walls, gates, pushable discs and freeze-pills. However, certain objects
-kill the player and some walls are invisible. Colliding with a monster is fatal
-too.
+## Run
 
+```sh
+npm test
+npx serve .
+```
 
-## Features
+Open the shown URL. Use **F1** to play, arrow keys to move, **F2** to pause,
+**F3** to lose a life, and **F8** to end the game. On mobile, use the
+direction pad or swipe on the board. Install it from the browser's
+"Add to Home Screen" or "Install app" action for a standalone offline app.
 
-- Attractive graphics
-- 20 levels of increasing difficulty
-- On-screen game information
-- The ability to play using a different level file
-- Simple level-file format to allow new level files to be created with
-  any text editor
-
-
-## Author
-
-- Original game copyright (c) 1994, Nat Pryce (budge@natpryce.com)
-- HTML/Javascript port copyright (c) 2017, Eitan and David Mosenkis
-	
-See the COPYRIGHT file for licensing information.
+The [original Tcl game](https://github.com/npryce/budge) is the behavioral
+specification. Game code is licensed under GPLv3; see [COPYRIGHT](COPYRIGHT)
+and [GPLv3.txt](GPLv3.txt). Original images and level data are additionally
+available under CC BY-SA 4.0, as stated in `COPYRIGHT`.
