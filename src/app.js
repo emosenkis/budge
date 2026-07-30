@@ -200,6 +200,8 @@ function sync() {
     game.transition === "dead" ? "AAAAaaaarrrrgggghhh..." :
     game.gameOver ? "Game over" : game.paused ? "Game paused" :
     game.freeze ? `Monsters frozen · ${Math.ceil(game.freeze / 4) / 10}s` : "";
+  $("#pause-screen").classList.toggle("hidden",
+    !game.paused || !!game.transition || game.gameOver);
   draw();
 }
 
@@ -235,6 +237,8 @@ $("#pause").addEventListener("click", () => {
   if (!game.gameOver && !game.transition) game.paused = !game.paused;
   sync();
 });
+$("#resume").addEventListener("click", () => $("#pause").click());
+$("#restart-level").addEventListener("click", () => $("#lose").click());
 $("#lose").addEventListener("click", () => {
   game.loseLife();
   sync();
